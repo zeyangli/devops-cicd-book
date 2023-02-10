@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment{
-        DEPLOY_ENV：
+        DEPLOY_ENV = "dev"
     }
     stages {
         stage('Build') {
@@ -11,7 +11,7 @@ pipeline {
         }
         stage('Deploy') {
             when {
-                environment name: 'DEPLOY_TO', value: 'DEV'
+                environment name: 'DEPLOY_ENV', value: 'prd'
             }
             steps {
                 echo 'Deploying.......'

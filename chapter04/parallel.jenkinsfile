@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+    stages {
+        stage('Parallel Stage') {
+            failFast true
+            parallel {
+                stage('windows') {
+                    agent {
+                        label "master"
+                    }
+                    steps {
+                        echo "windows"
+                    }
+                }
+                stage('linux') {
+                    agent {
+                        label "build"
+                    }
+                    steps {
+                        echo "linux"
+                    }
+                }
+            }
+        }
+    }
+}
