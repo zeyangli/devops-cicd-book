@@ -3,9 +3,7 @@ pipeline {
     stages {
         stage('Deploy') {
             input {
-                message "是否继续发布"
-                ok "Yes"
-                submitter "zeyang,aa"
+                message "是否继续发布并选择发布环境"
                 parameters {
                     string(name: 'ENVTYPE', defaultValue: 'DEV', description: 'env type..[DEV/STAG/PROD]')
                 }
