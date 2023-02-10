@@ -1,7 +1,7 @@
 pipeline {
     agent any
 	parameters { 
-        string(name: 'VERSION', defaultValue: '1.1.1', description: '')
+        string name: 'VERSION', defaultValue: '1.1.1', description: ''
         choice choices: ['dev', 'test', 'uat'], description: 'env names', name: 'ENVNAME' 
     }
     stages {
