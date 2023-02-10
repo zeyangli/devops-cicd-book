@@ -1,0 +1,15 @@
+pipeline {
+    agent { label "build" }
+    environment {
+        version = "1.1.1"
+        envType = "dev"
+    }
+    stages{
+        stage('Build'){
+            steps {
+                echo "${version}"
+                echo "${envType}"
+            }
+        }
+    }
+}
