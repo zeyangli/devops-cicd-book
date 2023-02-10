@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+    stages {
+        stage('Deploy') {
+            input {
+                message "是否继续发布"
+                ok "Yes"
+                submitter "zeyang,aa"
+                parameters {
+                    string(name: 'ENVTYPE', defaultValue: 'DEV', description: 'env type..[DEV/STAG/PROD]')
+                }
+            }
+            steps {
+                echo "Deploy to  ${ENVTYPE}, doing......."
+            }
+        }
+    }
+}
