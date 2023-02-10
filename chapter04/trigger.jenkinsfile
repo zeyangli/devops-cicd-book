@@ -1,7 +1,10 @@
 pipeline {
     agent any
     triggers {
-        cron('H */7 * * 1-5')  //定时
+        cron('H */7 * * 1-5')  //定时触发
+        //upstream(upstreamProjects: 'job1,job2',   //上游作业成功后触发
+        //     threshold: hudson.model.Result.SUCCESS)
+        //pollSCM('H */7 * * 1-5')  //被动轮训SCM触发
     }
     stages {
         stage('build') {
