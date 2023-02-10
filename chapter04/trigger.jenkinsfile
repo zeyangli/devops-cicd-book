@@ -1,0 +1,13 @@
+pipeline {
+    agent any
+    triggers {
+        cron('H */7 * * 1-5')  //定时
+    }
+    stages {
+        stage('build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}
