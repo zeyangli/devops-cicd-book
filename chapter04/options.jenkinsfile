@@ -10,7 +10,7 @@ pipeline {
             options {
                 timeout(time: 5, unit: 'MINUTES')
                 retry(3)
-                timestamps()   //可能
+                timestamps()   //需要安装Timestamper插件
             }
         }
     }
