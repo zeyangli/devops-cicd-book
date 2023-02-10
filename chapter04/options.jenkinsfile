@@ -1,0 +1,17 @@
+pipeline {
+    options {
+        disableConcurrentBuilds()
+        skipDefaultCheckout()
+        timeout(time: 1, unit: 'HOURS')
+    }
+    
+    stages {
+        stage("build"){
+            options {
+                timeout(time: 5, unit: 'MINUTES')
+                retry(3)
+                timestamps()   //可能
+            }
+        }
+    }
+}
