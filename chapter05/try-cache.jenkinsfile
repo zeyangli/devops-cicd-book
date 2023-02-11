@@ -1,31 +1,18 @@
 // try catch
 
-/*
-如果println(a)失败（肯定失败，因为有语法错误）
-catch捕获错误，并打印错误。
-finally 总是执行。
-error关键字可以抛出异常。
-*/
-
-
 pipeline{
 	agent any
-
 	stages{
 		stage("run"){
 			steps{
 				script{
-					// script
-
 					try {
-						println(a)   // not define a  error
+						println(a)   
 					}  catch(Exception e){
 						println(e)
-						//error "error..."
 					} finally {
 						println("always....")
 					}
-
 				}
 			}
 		}
