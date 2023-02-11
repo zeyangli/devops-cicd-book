@@ -1,0 +1,33 @@
+//if 
+
+// 第一
+branchName = "dev"
+
+pipeline {
+	agent any
+
+	stages{
+		stage("run"){
+			steps{
+				script {
+					// script
+
+					currentBuild.displayName = branchName
+
+					if ( branchName == "dev"){
+						println("deploy to dev....")
+						currentBuild.description = "deploy to dev...."
+
+					} else if (branchName == "master"){
+						println("deploy to stag....")
+						currentBuild.description = "deploy to stag...."
+					} else {
+						currentBuild.description = "error..."
+						println("error...")
+					}
+
+				}
+			}
+		}
+	}
+}
