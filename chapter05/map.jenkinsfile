@@ -1,5 +1,6 @@
 //Map
-// 在
+
+// 在Pipeline外部定义Map
 user_info = ["id": 100, "name": "jenkins"]
 
 
@@ -10,25 +11,27 @@ pipeline {
 		stage("run"){
 			steps{
 				script{
-					// script 
+					// 打印
 					println(user_info)
 
-					// get name
+					// 获取map中key对应的值
 					println(user_info["name"])
 					println(user_info["id"])
 
-					// = 
+					// 为map赋值
 					user_info["name"] = "jenkinsX"
 					println(user_info)
 
-					// key
+					// 判断Map中是否包含某个key
 					println(user_info.containsKey("name"))
+
+					// 判断Map中是否包含某个value
 				    println(user_info.containsValue(100))
 
-				    // keys
+				    // 获取Map中的key集合
 				    println(user_info.keySet())
 
-				    // remove
+				    // 删除Map中的Key
 				    user_info.remove("name")
 				    println(user_info)
 
