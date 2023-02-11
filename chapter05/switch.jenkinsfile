@@ -1,0 +1,29 @@
+//switch
+
+branchName = "dev"
+
+pipeline {
+	agent any
+
+	stages{
+		stage("run"){
+			steps{
+				script {
+					switch(branchName) {
+						case "dev":
+							println("deploy to dev....")
+							break
+
+						case "master":
+							println("deploy to stag....")
+							break
+
+						default:
+							println("error...")
+							break
+					}
+				}
+			}
+		}
+	}
+}
