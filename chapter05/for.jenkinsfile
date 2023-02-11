@@ -20,11 +20,9 @@ pipeline {
 						println(i["name"])
 						user_names << i["name"]
 					}
-
 					println(user_names)  // [devops,devops1,devops2,devops3]
 
-					// times 先换
-
+					// times 循环10次
 					10.times { i ->
 						println(i)
 					}
