@@ -1,0 +1,18 @@
+// while 
+
+sleeps = true
+
+pipeline {
+	agent any 
+	stages{
+		stage("run"){
+			steps{
+				script {
+					while(sleeps){
+						println("sleep....")
+					}
+				}
+			}
+		}
+	}
+}
