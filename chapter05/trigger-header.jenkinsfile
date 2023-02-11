@@ -1,5 +1,5 @@
-println("${username}")
-println("${version}")
+println("${header_name}")
+println("${header_id}")
 
 pipeline{
     agent any
@@ -7,10 +7,11 @@ pipeline{
         stage("test"){
             steps{
                 script{
-                    echo "${username}"
-                    echo "${version}"
+                    echo "${header_name}"
+                    echo "${header_id}"
                 }
             }
         }
     }
 }
+

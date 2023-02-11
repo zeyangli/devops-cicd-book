@@ -1,0 +1,16 @@
+pipeline{
+    agent any
+    stages{
+        stage("test"){
+            steps{
+                script{
+                    wrap([$class: 'BuildUser']){
+                        echo "full name is $BUILD_USER"
+                        echo "user id is $BUILD_USER_ID"
+                        echo "user email is $BUILD_USER_EMAIL"
+                    }
+                }
+            }
+        }
+    }
+}
