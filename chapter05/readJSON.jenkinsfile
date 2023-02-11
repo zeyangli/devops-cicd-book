@@ -1,0 +1,22 @@
+
+jsonData = """
+{
+    "name":"devops",
+    "id" : 100
+}
+
+"""
+
+pipeline{
+    agent any
+    stages {
+        stage("test"){
+            steps{
+                script{
+                    data = readJSON text: "${jsonData}"
+                    println(data.name)
+                }
+            }
+        }
+    }
+}
