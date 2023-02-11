@@ -1,38 +1,36 @@
 //List
 
-// 在
+// 在Pipeline外部定义List
 tools = ["gitlab", "jenkins", "maven", "sonar"]
 
 pipeline {
     agent any
-
     stages{
         stage("run"){
             steps{
                 script{
-                    // script
+                    // 打印
                     println(tools)
 
-                    // add
+                    // List中添加元素
                     println(tools + "k8s")
                     println(tools << "ansible")
+                    tools.add("maven")
+                    println(tools)
+
+                    // List中移除元素
                     println(tools - "maven")
                     println(tools)
 
-                    tools.add("maven")
-                    println(tools)
-                    println(tools.getClass())
-
-                    // contains
+                    // contains判断元素是否在List存在
                     println(tools.contains("jenkins"))
 
-                    // length
+                    // size()计算List中元素的个数
                     println(tools.size())
 
-                    // index
-                    println(tools[0])
-                    println(tools[-1])
-
+                    // index通过索引获取元素
+                    println(tools[0])    //0 第一个元素
+                    println(tools[-1])   //-1 最后一个元素
                 }
             }
         }
