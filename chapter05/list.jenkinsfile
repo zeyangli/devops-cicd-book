@@ -1,0 +1,40 @@
+//List
+
+// 在
+tools = ["gitlab", "jenkins", "maven", "sonar"]
+
+pipeline {
+    agent any
+
+    stages{
+        stage("run"){
+            steps{
+                script{
+                    // script
+                    println(tools)
+
+                    // add
+                    println(tools + "k8s")
+                    println(tools << "ansible")
+                    println(tools - "maven")
+                    println(tools)
+
+                    tools.add("maven")
+                    println(tools)
+                    println(tools.getClass())
+
+                    // contains
+                    println(tools.contains("jenkins"))
+
+                    // length
+                    println(tools.size())
+
+                    // index
+                    println(tools[0])
+                    println(tools[-1])
+
+                }
+            }
+        }
+    }
+}

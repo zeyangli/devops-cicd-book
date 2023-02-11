@@ -1,4 +1,5 @@
 //String
+// 在pipeline外部定义变量（全局生效）
 name = "devops"
 
 pipeline {
@@ -10,21 +11,22 @@ pipeline {
 					// 打印
 					println(name)  
 
-					// buname-appname-type
+					// 在pipeline内定义变量（该阶段生效）
 					job_name = "devops05-app-service_CI"
 
+					// split()方法进行字符串分割
 					// ["devops05", "app", "service_CI"]
 					bu_name = job_name.split('-')[0]
 					println(bu_name)  //devops05
 
-					// contains
+					// contains()判断字符串是否包含特定字符
 					println(job_name.contains("CI"))
 
-					//size/length
+					//size/length计算字符串的长度
 					println("size: ${job_name.size()}")
 					println("length: ${job_name.length()}")
 
-					//endsWith()
+					//endsWith()判断字符串是否以特定字符结尾
 					println("enswith CI: ${job_name.endsWith('CI')}")
 
 				}
