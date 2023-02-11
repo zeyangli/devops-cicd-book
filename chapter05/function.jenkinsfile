@@ -15,7 +15,6 @@ pipeline{
                     // 调用函数并打印返回值
 					name = GetUserNameByID(1)
 					println(name)   //jenkins1
-
 				}
 			}
 		}
