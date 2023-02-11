@@ -1,0 +1,35 @@
+//String
+name = "devops"
+
+pipeline {
+	agent any
+	stages{
+		stage("run"){
+			steps{
+				script{
+					// 打印
+					println(name)  
+
+					// buname-appname-type
+					job_name = "devops05-app-service_CI"
+
+					// ["devops05", "app", "service_CI"]
+					bu_name = job_name.split('-')[0]
+					println(bu_name)  //devops05
+
+					// contains
+					println(job_name.contains("CI"))
+
+					//size/length
+					println("size: ${job_name.size()}")
+					println("length: ${job_name.length()}")
+
+					//endsWith()
+					println("enswith CI: ${job_name.endsWith('CI')}")
+
+				}
+			}
+		}
+	}
+}
+
