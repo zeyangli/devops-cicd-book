@@ -1,9 +1,4 @@
 //function
-/*
-def关键字 定义函数名为GetUserNameByID， 带有一个参数id;
-函数体内的for循环遍历users的列表，如果id与参数id一致则返回用户的name；否则返回null；
-*/
-
 
 users = [
 			["id": 1, "name": "jenkins1"],
@@ -11,17 +6,13 @@ users = [
 			["id": 3, "name": "jenkins3"],
 		]
 
-
 pipeline{
 	agent any 
-
 	stages{
 		stage("run"){
 			steps{
 				script {
-					//script
                     // 调用函数并打印返回值
-
 					name = GetUserNameByID(1)
 					println(name)   //jenkins1
 
@@ -31,8 +22,6 @@ pipeline{
 	}
 }
 
-
-// define GetUserName
 def GetUserNameByID(id){
 	for (i in users){
 		if (i["id"] == id){
