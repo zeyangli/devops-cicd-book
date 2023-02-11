@@ -1,0 +1,36 @@
+//for 
+
+users = [ 
+			["name": "devops", "role": "dev"], 
+			["name": "devops1", "role": "admin"], 
+			["name": "devops2", "role": "ops"], 
+			["name": "devops3", "role": "test"]
+		]
+
+pipeline {
+	agent any
+
+	stages{
+		stage("run"){
+			steps{
+				script {
+				
+					user_names = []
+					for (i in users){
+						println(i["name"])
+						user_names << i["name"]
+					}
+
+					println(user_names)  // [devops,devops1,devops2,devops3]
+
+					// times 先换
+
+					10.times { i ->
+						println(i)
+					}
+
+				}
+			}
+		}
+	}
+}
