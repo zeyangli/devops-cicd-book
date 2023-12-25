@@ -1,0 +1,10 @@
+pipeline {
+    agent { label "build" l}
+    stages{
+        stage('Build'){
+            steps {
+                echo "building... "//打印消息
+            }
+        }
+    }
+}

@@ -1,0 +1,30 @@
+pipeline {
+    agent none
+    stages{
+        stage('Build'){
+            agent { label "build" }
+            steps {
+                echo "building..."
+            }
+    post {
+        always{
+            script{
+                println("pipeline 结束后，经常做的事情")
+            }
+        }
+        success{
+            script{
+                println("pipeline 成功后，要做的事情") }
+            } 
+        }
+        failure{
+            script{
+                println("pipeline 失败后，要做的事情")
+            }
+        }
+        aborted{
+            script{
+                println("pipeline 取消后，要做的事情") 
+            }
+        }
+    }
