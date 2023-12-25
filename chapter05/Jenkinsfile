@@ -1,0 +1,30 @@
+//GitLab 传递的数据{} println("${WebHookData}")
+//数据格式化
+webHookData = readJSON text: "${WebhookData}"
+//提取仓库信息
+env.srcUrl = webHookData["project"]["git_http_url"] //项目地址 
+env.branchName = webHookData["ref"] - "refs/heads/" //分支
+env.commitId = webHookData["checkout_sha"] //提交ID
+env.commitUser = webHookData["user_username"] //提交人
+env.userEmail = webHookData["user_email"]  //邮箱
+ 
+currentBuild.description = "Trigger by Gitlab \n branch: ${env.branchName}" //增加构建描述
+currentBuild.displayName = "${env.commitId}" //将构建ID变为提交ID
+
+//增加构建描述
+currentBuild.displayName = "${env.commitId}"
+pipeline {
+    agent any
+    stages {
+        stage("CheckOut"){
+            steps{
+                script {
+                    checkout([$class: 'GitSCM', branches: [[name: env.branchName ]],
+                            extensions: [],
+                            userRemoteConfigs: [[credentialsId: 'gitlab-admin-user', url: env.srcUrl ]]])
+                    sh "ls -l" 
+                }
+            } 
+        }
+    } 
+}

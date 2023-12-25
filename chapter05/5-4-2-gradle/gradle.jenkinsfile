@@ -1,0 +1,9 @@
+//Jenkins Pipeline中的build阶段 
+stage("Build"){
+    steps{
+        script{
+        //sh 执行 shell 命令 
+        sh "gradle build"
+        } 
+    }
+}
