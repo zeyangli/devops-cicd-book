@@ -1,0 +1,45 @@
+pipeline {
+    agent { label "build"}
+    options {
+        skipDefaultCheckout true
+    }
+    stages{
+        stage("CheckOut"){
+            steps{
+                script{
+                    println("CheckOut")
+                }
+            }        
+        }
+        stage("Build"){
+            steps{
+                script{
+                    println("Build")
+                } 
+            }
+        }
+        stage("PushArtifact"){
+            steps{
+                script{
+                    println("PushArtifact") 
+                    //上传制品 
+                    PushArtifactByPlugin()
+                } 
+            }
+        }
+    } 
+}
+
+//使用插件上传
+def PushArtifactByPlugin(){
+    nexusArtifactUploader artifacts: [[artifactId: 'demo-app',
+            classifier: '',
+            file: 'target/demo-0.0.1-SNAPSHOT.jar',
+            type: 'jar']], credentialsId:'71cbafcb-6447-4213-b214-46535a2ef733',
+            groupId: 'com.devops6',
+            nexusUrl: '192.168.1.200:8081',
+            nexusVersion: 'nexus3',
+            protocol: 'http',
+            repository: 'maven-devops6-release',
+            version: '1.1.1'
+}
