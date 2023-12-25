@@ -1,0 +1,23 @@
+// 加载共享库
+@Library("mylib@main") _ 
+
+// 导入src中的类和函数
+def mydemo = new org.devops.Demo()
+
+pipeline{
+    agent any
+    stages{
+        stage("test"){
+            steps{
+                script{
+                    // pipeline中调用Demo.groovy中的方法
+                    mydemo.PrintMsg("hello 这是src中的方法输出")
+
+                    // pipeline中调用vars/Hello.groovy中的方法
+                    hello.GetFiles()
+                }
+            }
+        }
+    }
+}
+
