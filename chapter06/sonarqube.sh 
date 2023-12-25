@@ -1,0 +1,26 @@
+# 创建数据目录
+mkdir -p /data/devops/sonarqube/{sonarqube_conf,sonarqube_extensions}
+mkdir -p /data/devops/sonarqube/{sonarqube_logs,sonarqube_data}
+
+# 启动容器
+docker run -itd --name sonarqube \
+-p 9000:9000 \
+-v /data/devops/sonarqube/sonarqube_conf:/opt/sonarqube/conf \ -v /data/devops/sonarqube/sonarqube_extensions:/opt/sonarqube/
+extensions \
+   -v /data/devops/sonarqube/sonarqube_logs:/opt/sonarqube/logs \
+   -v /data/devops/sonarqube/sonarqube_data:/opt/sonarqube/data \
+   sonarqube:lts-community
+
+
+# 安装sonar-scanner
+##下载包
+wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/ sonar-scanner-cli-4.8.0.2856-linux.zip
+##解压包
+unzip sonar-scanner-cli-4.8.0.2856-linux.zip
+##设置环境变量
+vim /etc/profile
+export SONAR_SCANNER_HOME=/root/books/sonar-scanner-4.8.0.2856-linux 
+export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+source /etc/profile
+##测试生效 
+sonar-scanner -v

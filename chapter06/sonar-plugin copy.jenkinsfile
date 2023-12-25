@@ -1,0 +1,48 @@
+//流水线 
+pipeline {
+    //指定构建节点
+    agent { label "build"} 
+    stages{
+    //下载代码 
+    stage("CheckOut"){
+        steps{
+            script{
+                println("CheckOut")
+                checkout([$class: 'GitSCM',
+                    branches: [[name: "${params.branchName}"]],
+                    extensions: [], userRemoteConfigs:[[credentialsId:'gitlab-admin-user', url: "${params.srcUrl}"]]])
+                sh "ls -l " //验证 
+            }
+        } 
+    }
+    //构建代码 
+    stage("Build"){
+        steps{
+            script{
+                println("Build")
+                sh "${params.buildShell}"
+            }
+        } 
+    }
+    //代码扫描 
+    stage("CodeScan"){
+        steps{
+            script{
+                println("CodeScan")
+                withCredentials([usernamePassword(credentialsId:
+                                    '702cae96-20f6-42dc-b8c2-d5a5f005e297',
+                                    passwordVariable: 'PASSWORD',
+                                    usernameVariable: 'USERNAME')]) 
+                { 
+                    //使用插件方式
+                    withSonarQubeEnv("SonarQube"){
+                        sh "sonar-scanner \
+                            -Dsonar.login=${USERNAME} \
+                            -Dsonar.password=${PASSWORD}"
+                        } 
+                    } 
+                }
+            } 
+        }
+    } 
+}
