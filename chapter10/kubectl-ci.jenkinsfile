@@ -1,0 +1,107 @@
+@Library("devops06@main") _ 
+
+//import  src/org/devops/Build.groovy
+def build = new org.devops.Build()
+def sonar = new org.devops.Sonar()
+def checkout = new org.devops.Checkout()
+def mygit = new org.devops.Gitlab()
+
+
+pipeline {
+    agent { label "build"}
+    options {
+        skipDefaultCheckout true
+    }
+    stages{
+        stage("CheckOut"){
+            steps{
+                script{
+                   build.CheckOut()
+                }
+            }
+        }
+        stage("Build"){
+            steps{
+                script{
+                    build.Build()
+                }
+            }
+        }
+
+        stage("CodeScan"){
+            steps{
+                script{
+                    sonar.SonarScannerByPlugin()
+                }
+            }
+        }
+        stage("ImageBuild"){
+            steps{
+                script{
+                    appName = "${JOB_NAME}".split('_')[0] //devops6-maven-service
+                    repoName = appName.split('-')[0]   //devops6
+                    //commitID
+                    commitID = checkout.GetCommitID()
+                    println(commitID)
+                    //镜像名称
+                    imageName = "${repoName}/${appName}"
+                    imageTag = "${env.branchName}-${commitID}"
+                    env.fullImageName = "192.168.1.200:8088/${imageName}:${imageTag}"
+                    sh """
+                        #登录镜像仓库
+                        docker login -u admin -p Harbor12345 192.168.1.200:8088
+
+                        # 构建镜像
+                        docker build -t ${env.fullImageName} .
+
+                        # 上传镜像
+                        docker push ${env.fullImageName}
+
+                        # 删除镜像
+                        sleep 2
+                        docker rmi ${env.fullImageName}
+                    """ 
+                }
+            }
+        }
+        stage("UpdateEnvFile"){
+            steps{
+                script {
+                    // 更新部署文件
+
+                    projectId = 9
+                    fileName = "Deployment.yaml"  //模板文件
+                    branchName = "main"
+                    //下载模板文件
+                    fileData = mygit.GetRepoFile(projectId,fileName, branchName )
+                    sh "rm -fr ${fileName}"
+
+                    //模板文件内容保存到本地
+                    writeFile file: fileName , text: fileData
+                    env.deployFile = fileName
+                    //替换镜像
+                    sh "sed -i 's#__IMAGE_NAME__#${env.fullImageName}#g' ${env.deployFile} "
+                    sh "ls -l ; cat ${fileName}"
+
+                    //创建/更新发布文件
+                    newYaml = sh returnStdout: true, script: "cat ${env.deployFile}"
+                    println(newYaml)
+                    //更新gitlab文件内容
+                    base64Content = newYaml.bytes.encodeBase64().toString()
+                    
+                    appName = "${JOB_NAME}".split('_')[0] //devops6-npm-service
+                    env.groupName = appName.split('-')[0]   //devops6
+                    env.projectName = appName
+
+                    // 会有并行问题，同时更新报错
+                    try {
+                        mygit.UpdateRepoFile(projectId,"${env.projectName}%2f${env.branchName}.yaml",base64Content, "main")
+                    } catch(e){
+                        mygit.CreateRepoFile(projectId,"${env.projectName}%2f${env.branchName}.yaml",base64Content, "main")
+                    }
+                }
+            }
+        }
+    }
+}
+

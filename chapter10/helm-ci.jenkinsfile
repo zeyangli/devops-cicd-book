@@ -1,0 +1,130 @@
+@Library("devops06@main") _ 
+
+//import  src/org/devops/Build.groovy
+def build = new org.devops.Build()
+def sonar = new org.devops.Sonar()
+def checkouts = new org.devops.Checkout()
+def mygit = new org.devops.Gitlab()
+
+
+pipeline {
+    agent { label "build"}
+    options {
+        skipDefaultCheckout true
+    }
+    stages{
+        stage("CheckOut"){
+            steps{
+                script{
+                   build.CheckOut()
+                }
+            }
+        }
+        stage("Build"){
+            steps{
+                script{
+                    build.Build()
+                }
+            }
+        }
+
+        stage("CodeScan"){
+            steps{
+                script{
+                    sonar.SonarScannerByPlugin()
+                }
+            }
+        }
+        stage("ImageBuild"){
+            steps{
+                script{
+                    //PushArtifactByPlugin()
+                    //PushArtifactByPluginPOM()
+                    // init package info
+                    appName = "${JOB_NAME}".split('_')[0] //devops6-maven-service
+                    repoName = appName.split('-')[0]   //devops6
+                    //commitID
+                    commitID = checkouts.GetCommitID()
+                    println(commitID)
+
+                    imageName = "${repoName}/${appName}"
+                    env.imageTag = "${env.branchName}-${commitID}"
+                    env.fullImageName = "192.168.1.200:8088/${imageName}:${env.imageTag}"
+                    sh """
+                        #登录镜像仓库
+                        docker login -u admin -p Harbor12345 192.168.1.200:8088
+
+                        # 构建镜像
+                        docker build -t ${env.fullImageName} .
+
+                        # 上传镜像
+                        docker push ${env.fullImageName}
+
+                        # 删除镜像
+                        sleep 2
+                        docker rmi ${env.fullImageName}
+                    """ 
+                }
+            }
+        }
+        stage("UpdateEnvFile"){
+            steps{
+                script {
+                    // 更新部署文件
+
+                    projectId = 10
+                    fileName = "values.yaml"  //模板文件
+                    branchName = "master"
+                    //下载模板文件
+                    fileData = mygit.GetRepoFile(projectId,fileName, branchName )
+                    sh "rm -fr ${fileName}"
+
+                    //修改镜像tag
+                    yamlData = readYaml text: fileData
+                    yamlData.image.tag = "${env.imageTag}"
+
+                    //模板文件内容保存到本地
+                    writeYaml file: "${fileName}" , data: yamlData
+
+                
+                    //创建/更新发布文件
+                    newYaml = sh returnStdout: true, script: "cat ${fileName}"
+                    println(newYaml)
+                    //更新gitlab文件内容
+                    base64Content = newYaml.bytes.encodeBase64().toString()
+                    
+
+                    // 会有并行问题，同时更新报错
+                    try {
+                        mygit.UpdateRepoFile(projectId,"${fileName}",base64Content, "master")
+                    } catch(e){
+                        mygit.CreateRepoFile(projectId,"${fileName}",base64Content, "master")
+                    }
+                }
+            }
+        }
+        stage("HelmPackage"){
+            steps{
+                script{
+                    // helm pakcage & push harbor
+                    appName = "${JOB_NAME}".split('_')[0]
+                    sh "mkdir -p ${appName}"
+                    ws("${workspace}/${appName}"){
+                        checkout([$class: 'GitSCM', branches: [[name: '*/master']], 
+                            extensions: [], 
+                            userRemoteConfigs: [[credentialsId: 'gitlab-admin', 
+                            url: 'http://192.168.1.200:8076/devops6/devops6-helm-repo.git']]])
+                    }
+                    //helm package
+                    chartVersion = "${env.branchName}".split("-")[-1]  //1.1.1
+                    sh """ 
+                        helm package ${appName} --version ${chartVersion}
+                        helm cm-push ${appName}-${chartVersion}.tgz devops6repo
+                    """
+
+                }
+            }
+        }
+    }
+}
+

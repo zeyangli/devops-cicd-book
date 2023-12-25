@@ -1,0 +1,85 @@
+@Library("devops06@main") _ 
+
+def checkout = new org.devops.Checkout()
+def build = new org.devops.Build()
+
+pipeline {
+    agent { label "build"}
+    options {
+        skipDefaultCheckout true
+    }
+    stages{
+        stage("GetHelmChart"){
+            steps{
+                script{
+                    //下载helm chart
+                    env.chartVersion = "${env.branchName}".split("-")[-1]
+                    env.appName = "${JOB_NAME}".split('_')[0]
+                    sh """
+                        helm repo update devops6repo
+                        helm pull devops6repo/${env.appName} --version ${env.chartVersion}
+                    """
+                }
+            }
+        }
+
+        stage("Deploy"){
+            steps{
+                script{
+                    env.namespace = "${env.appName}".split('-')[0]   //devops6
+
+                    sh """
+                        ## 发布应用
+                        helm upgrade --install --create-namespace  "${env.appName}" ./"${env.appName}"-${env.chartVersion}.tgz -n ${env.namespace}
+                        helm history "${env.appName}"  -n ${env.namespace}
+                    """
+
+                    // 获取应用状态
+                    5.times{
+                        sh "sleep 2; kubectl -n ${env.namespace} get pod | grep ${env.appName}"
+                    }
+
+                    //收集history
+                    env.revision = sh returnStdout: true, 
+                                      script: """helm history ${env.appName} -n ${env.namespace} | grep -v 'REVISION' | awk '{print \$1}' """
+                    println("${env.revision}")
+                    println("${env.revision.split('\n').toString()}")
+                    env.REVISION = "${env.revision.split('\n').toString()}"
+                    println("${env.REVISION}")
+                }
+            }
+        }
+
+
+        stage("RollOut"){
+            input {
+                message "是否进行回滚"
+                ok "提交"
+                submitter ""
+                parameters {
+                    choice(choices: ['yes', 'no'], name: 'opts')
+                }
+            }
+
+            steps{
+                script{
+
+                   switch("${opts}") {
+                        case "yes":
+                        def result = input  message: "选择回滚版本?", 
+                            parameters: [choice(choices: env.REVISION, name: 'rversion')]
+
+                        println("${result}")
+                        sh "helm rollback ${env.appName} ${result} -n ${env.namespace} "
+                        break
+
+                        case "no":
+                        break
+                    }
+                }
+            }
+        }
+    }
+}
+
+

@@ -1,0 +1,70 @@
+@Library("devops06@main") _ 
+
+def mygit = new org.devops.Gitlab()
+
+pipeline {
+    agent { label "build"}
+    options {
+        skipDefaultCheckout true
+    }
+    stages{
+        stage("GetManifests"){
+            steps{
+                script{
+                   
+                   //下载发布文件
+                    projectId = 9
+                    env.deployFile = "${env.branchName}.yaml"  //版本分支RELEASE-2.1.1.yaml
+                    env.appName = "${JOB_NAME}".split('_')[0] //devops6-maven-service
+                    filePath = "${env.appName}%2f${env.deployFile}" //devops6-npm-service/RELEASE-2.1.1.yaml
+                    branchName = "main"
+                    fileData = mygit.GetRepoFile(projectId,filePath, branchName )
+                    sh "rm -fr ${env.deployFile}"
+                    writeFile file: env.deployFile , text: fileData
+                    sh "ls -l ; cat ${env.deployFile}"
+                }
+            }
+        }
+
+        stage("Deploy"){
+            steps{
+                script{
+                    env.namespace = "${env.appName}".split('-')[0]   //devops6
+
+                    sh """
+                        ## 发布应用
+                        kubectl apply -f ${env.deployFile} -n ${env.namespace}
+
+                    """
+
+                    // 获取应用状态
+                    5.times{
+                        sh "sleep 2; kubectl -n ${env.namespace} get pod | grep ${env.appName}"
+                    }
+                }
+            }
+        }
+
+        stage("RollBack"){
+            input {
+                message "是否进行回滚"
+                ok "提交"
+                submitter ""
+                parameters {
+                    choice(choices: ['yes', 'no'], name: 'opts')
+                }
+            }
+            steps{
+                script{
+                    switch("${opts}") {
+                        case "yes":
+                            sh "kubectl rollout undo deployment/${env.appName} -n ${env.namespace} "
+                            break
+                        case "no":
+                            break
+                    }
+                }
+            }
+        }
+    }
+}
